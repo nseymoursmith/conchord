@@ -94,7 +94,8 @@ for i in range(len(keys)):
     chord_buttons[keys[i]] = {"notes": notes[i],
                               "text": names[i],
                               "coords": coordinates[i],
-                              "keyboard": keys[i]}
+                              "keyboard": keys[i],
+                              "state": False}
 
 # Game loop
 running = True
@@ -106,14 +107,21 @@ while running:
             if event.key in chord_buttons:
                 print(chord_buttons[event.key])
                 button = chord_buttons[event.key]
-                # Play the chord
-                for note in button["notes"]:
-                    msg = mido.Message('note_on', note=note, velocity=64)
-                    output.send(msg)
-                pygame.time.wait(500)  # Wait for 0.5 seconds
-                for note in button["notes"]:
-                    msg = mido.Message('note_off', note=note, velocity=64)
-                    output.send(msg)
+                if button["state"] is False:
+                    button["state"] = True
+                    # Play the chord
+                    for note in button["notes"]:
+                        msg = mido.Message('note_on', note=note, velocity=64)
+                        output.send(msg)
+        elif event.type == pygame.KEYUP:
+            if event.key in chord_buttons:
+                print(chord_buttons[event.key])
+                button = chord_buttons[event.key]
+                if button["state"] is True:
+                    button["state"] = False
+                    for note in button["notes"]:
+                        msg = mido.Message('note_off', note=note, velocity=64)
+                        output.send(msg)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             for key, button in chord_buttons.items():
                 if (button["coords"][0] < event.pos[0] < button["coords"][0] + CHORD_BUTTON_WIDTH and

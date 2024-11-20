@@ -134,8 +134,10 @@ while running:
                     button["state"] = 'note_on' if event.type == pygame.MOUSEBUTTONDOWN else 'note_off'
                     # Play/stop the chord
                     for note in button["notes"]:
-                        msg = mido.Message(button["state"], note=note, velocity=64)
-                        output.send(msg)
+                        for octave in current_register:
+                            active_note = note + 12 * octave
+                            msg = mido.Message(button["state"], note=active_note, velocity=64)
+                            output.send(msg)
 
     # Draw everything
     screen.fill(BLACK)

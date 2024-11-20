@@ -78,7 +78,7 @@ seventh_notes = [list(map(lambda x: x + n[0] + 12, (0, 4, 10)))
 seventh_names = [f"{root_name}7" for root_name in root_names]
 seventh_keys = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v,
                 pygame.K_b, pygame.K_n, pygame.K_m, pygame.K_COMMA,
-                pygame.K_PERIOD, pygame.K_SLASH, pygame.K_F15, pygame.K_F15]
+                pygame.K_PERIOD, pygame.K_SLASH, pygame.K_F14, pygame.K_F15]
 
 
 coordinates = [(top_left + (n % columns)*x_space,
@@ -114,20 +114,19 @@ while running:
                 for note in button["notes"]:
                     msg = mido.Message('note_off', note=note, velocity=64)
                     output.send(msg)
-
-        # elif event.type == pygame.MOUSEBUTTONDOWN:
-        #     for button in chord_buttons:
-        #         if (button["coords"][0] < event.pos[0] < button["coords"][0] + CHORD_BUTTON_WIDTH and
-        #                 button["coords"][1] < event.pos[1] < button["coords"][1] + CHORD_BUTTON_HEIGHT):
-        #             print(button)
-        #             # Play the chord
-        #             for note in button["notes"]:
-        #                 msg = mido.Message('note_on', note=note, velocity=64)
-        #                 output.send(msg)
-        #             pygame.time.wait(500)  # Wait for 0.5 seconds
-        #             for note in button["notes"]:
-        #                 msg = mido.Message('note_off', note=note, velocity=64)
-        #                 output.send(msg)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            for key, button in chord_buttons.items():
+                if (button["coords"][0] < event.pos[0] < button["coords"][0] + CHORD_BUTTON_WIDTH and
+                        button["coords"][1] < event.pos[1] < button["coords"][1] + CHORD_BUTTON_HEIGHT):
+                    print(button)
+                    # Play the chord
+                    for note in button["notes"]:
+                        msg = mido.Message('note_on', note=note, velocity=64)
+                        output.send(msg)
+                    pygame.time.wait(500)  # Wait for 0.5 seconds
+                    for note in button["notes"]:
+                        msg = mido.Message('note_off', note=note, velocity=64)
+                        output.send(msg)
 
     # Draw everything
     screen.fill(BLACK)

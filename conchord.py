@@ -8,6 +8,7 @@ pygame.init()
 # Set up some constants
 WIDTH, HEIGHT = 1900, 850
 WHITE = (255, 255, 255)
+GREY = (127, 127, 127)
 BLACK = (0, 0, 0)
 CHORD_BUTTON_WIDTH = 100
 CHORD_BUTTON_HEIGHT = 50
@@ -126,7 +127,8 @@ while running:
     # Draw everything
     screen.fill(BLACK)
     for key, button in chord_buttons.items():
-        pygame.draw.rect(screen, WHITE, (button["coords"][0], button["coords"][1], CHORD_BUTTON_WIDTH, CHORD_BUTTON_HEIGHT))
+        colour = WHITE if button["state"] == 'note_off' else GREY
+        pygame.draw.rect(screen, colour, (button["coords"][0], button["coords"][1], CHORD_BUTTON_WIDTH, CHORD_BUTTON_HEIGHT))
         text_surface = font.render(button["text"], True, BLACK)
         screen.blit(text_surface, (button["coords"][0] + 10, button["coords"][1] + 10))
 

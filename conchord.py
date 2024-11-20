@@ -36,7 +36,18 @@ y_space = 150
 
 rows = 5
 columns = 12
-octave = -2  # From C3 bass (on 6th row)
+octave = -1  # From C3 bass (on 6th row)
+
+# registers
+soprano = [2]
+alto = [2, 1]
+tenor = [2, 1, 0]
+soft_tenor = [1, 0]
+master = [2, 1, 0, -1]
+soft_bass = [0, -1]
+bass_alto = [2, 1, -1]
+
+current_register = soft_bass
 
 # Db leftmost bass
 root_notes_lower = [[61 + 2 * i + octave * 12] for i in range(int(columns/2))]
@@ -111,8 +122,10 @@ while running:
                 button["state"] = 'note_on' if event.type == pygame.KEYDOWN else 'note_off'
                 # Play/stop the chord
                 for note in button["notes"]:
-                    msg = mido.Message(button["state"], note=note, velocity=64)
-                    output.send(msg)
+                    for octave in current_register:
+                        active_note = note + 12 * octave
+                        msg = mido.Message(button["state"], note=active_note, velocity=64)
+                        output.send(msg)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
                 if (button["coords"][0] < event.pos[0] < button["coords"][0] + CHORD_BUTTON_WIDTH and

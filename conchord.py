@@ -1,6 +1,6 @@
 import pygame
 import mido
-from math import floor
+import math
 
 # Initialize Pygame
 pygame.init()
@@ -12,6 +12,7 @@ GREY = (127, 127, 127)
 BLACK = (0, 0, 0)
 CHORD_BUTTON_WIDTH = 100
 CHORD_BUTTON_HEIGHT = 50
+CHORD_BUTTON_RADIUS = 40
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -36,7 +37,7 @@ y_space = 150
 
 rows = 5
 columns = 12
-octave = -1  # From C3 bass (on 6th row)
+root_shift = 0  # From C3 bass (on 6th row)
 
 # registers
 soprano = [2]
@@ -50,10 +51,10 @@ bass_alto = [2, 1, -1]
 current_register = soft_bass
 
 # Db leftmost bass
-root_notes_lower = [[61 + 2 * i + octave * 12] for i in range(int(columns/2))]
+root_notes_lower = [[61 + 2 * i + root_shift * 12] for i in range(int(columns/2))]
 
 # Ab major fourth below
-root_notes_higher = [[56 + 2 * i + octave * 12] for i in range(int(columns/2))]
+root_notes_higher = [[56 + 2 * i + root_shift * 12] for i in range(int(columns/2))]
 
 root_notes = root_notes_lower + root_notes_higher
 # Interleave to get major fourth major fifth alternating
@@ -94,7 +95,7 @@ seventh_keys = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v,
 
 
 coordinates = [(top_left + (n % columns)*x_space,
-                top_left + floor(n / columns)*y_space)
+                top_left + math.floor(n / columns)*y_space)
                for n in range(rows * columns)]
 
 notes = counter_bass + root_notes + major_notes + minor_notes + seventh_notes
@@ -108,6 +109,9 @@ for i in range(len(keys)):
                               "coords": coordinates[i],
                               "keyboard": keys[i],
                               "state": 'note_off'}
+
+def radial_distance(centre, pointer):
+    return math.sqrt((pointer[0] - centre[0])**2 + (pointer[1] - centre[1])**2)
 
 # Game loop
 running = True
@@ -128,8 +132,7 @@ while running:
                         output.send(msg)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
-                if (button["coords"][0] < event.pos[0] < button["coords"][0] + CHORD_BUTTON_WIDTH and
-                        button["coords"][1] < event.pos[1] < button["coords"][1] + CHORD_BUTTON_HEIGHT):
+                if (radial_distance(button["coords"], event.pos) < CHORD_BUTTON_RADIUS):
                     print(button)
                     button["state"] = 'note_on' if event.type == pygame.MOUSEBUTTONDOWN else 'note_off'
                     # Play/stop the chord
@@ -143,9 +146,10 @@ while running:
     screen.fill(BLACK)
     for key, button in chord_buttons.items():
         colour = WHITE if button["state"] == 'note_off' else GREY
-        pygame.draw.rect(screen, colour, (button["coords"][0], button["coords"][1], CHORD_BUTTON_WIDTH, CHORD_BUTTON_HEIGHT))
+        pygame.draw.circle(screen, colour, (button["coords"][0], button["coords"][1]), CHORD_BUTTON_RADIUS)
         text_surface = font.render(button["text"], True, BLACK)
-        screen.blit(text_surface, (button["coords"][0] + 10, button["coords"][1] + 10))
+        text_rect = text_surface.get_rect(center=(button["coords"][0], button["coords"][1]))
+        screen.blit(text_surface, text_rect)
 
     pygame.display.flip()
 

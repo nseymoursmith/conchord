@@ -10,9 +10,15 @@ WIDTH, HEIGHT = 1900, 850
 WHITE = (255, 255, 255)
 GREY = (127, 127, 127)
 BLACK = (0, 0, 0)
-CHORD_BUTTON_WIDTH = 100
-CHORD_BUTTON_HEIGHT = 50
 CHORD_BUTTON_RADIUS = 40
+
+bass_x = 100
+bass_y = 250
+x_space = 100
+y_space = 100
+register_x = 350
+register_y = 100
+
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -31,13 +37,9 @@ output = mido.open_output()
 #     "dim7": [-3, 0, 3],
 #
 
-top_left = 100
-x_space = 150
-y_space = 150
-
 rows = 5
 columns = 12
-root_shift = 0  # From C3 bass (on 6th row)
+root_shift = -1  # From C3 bass (on 6th row)
 
 # registers
 soprano = [2]
@@ -48,7 +50,37 @@ master = [2, 1, 0, -1]
 soft_bass = [0, -1]
 bass_alto = [2, 1, -1]
 
+registers = [{"image": pygame.image.load("soprano.png"),
+              "image_b": pygame.image.load("soprano_b.png"),
+              "banks": soprano,
+              "contralto": False},
+             {"image": pygame.image.load("alto.png"),
+              "image_b": pygame.image.load("alto_b.png"),
+              "banks": alto,
+              "contralto": False},
+             {"image": pygame.image.load("tenor.png"),
+              "image_b": pygame.image.load("tenor_b.png"),
+              "banks": tenor,
+              "contralto": False},
+             {"image": pygame.image.load("soft_tenor.png"),
+              "image_b": pygame.image.load("soft_tenor_b.png"),
+              "banks": soft_tenor,
+              "contralto": False},
+             {"image": pygame.image.load("master.png"),
+              "image_b": pygame.image.load("master_b.png"),
+              "banks": master,
+              "contralto": True},
+             {"image": pygame.image.load("soft_bass.png"),
+              "image_b": pygame.image.load("soft_bass_b.png"),
+              "banks": soft_bass,
+              "contralto": True},
+             {"image": pygame.image.load("bass-alto.png"),
+              "image_b": pygame.image.load("bass-alto_b.png"),
+              "banks": bass_alto,
+              "contralto": False}]
+
 current_register = soft_bass
+contralto = False
 
 # Db leftmost bass
 root_notes_lower = [[61 + 2 * i + root_shift * 12] for i in range(int(columns/2))]
@@ -94,8 +126,8 @@ seventh_keys = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v,
                 pygame.K_PERIOD, pygame.K_SLASH, pygame.K_F14, pygame.K_F15]
 
 
-coordinates = [(top_left + (n % columns)*x_space,
-                top_left + math.floor(n / columns)*y_space)
+coordinates = [(bass_x + (n % columns)*x_space + math.floor(n / columns)*x_space/3,
+                bass_y + math.floor(n / columns)*y_space)
                for n in range(rows * columns)]
 
 notes = counter_bass + root_notes + major_notes + minor_notes + seventh_notes
@@ -130,6 +162,10 @@ while running:
                         active_note = note + 12 * octave
                         msg = mido.Message(button["state"], note=active_note, velocity=64)
                         output.send(msg)
+                    if contralto:
+                        active_note = note + 12
+                        msg = mido.Message(button["state"], note=active_note, velocity=64, channel=1)
+                        output.send(msg)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
                 if (radial_distance(button["coords"], event.pos) < CHORD_BUTTON_RADIUS):
@@ -141,6 +177,17 @@ while running:
                             active_note = note + 12 * octave
                             msg = mido.Message(button["state"], note=active_note, velocity=64)
                             output.send(msg)
+                        if contralto:
+                            active_note = note + 12
+                            msg = mido.Message(button["state"], note=active_note, velocity=64, channel=1)
+                            output.send(msg)
+            for n in range(len(registers)):
+                coords = (register_x + n * x_space, register_y)
+                if (radial_distance(coords, event.pos) < CHORD_BUTTON_RADIUS*3/4):
+                    banks = registers[n]["banks"]
+                    print(banks)
+                    current_register = banks
+                    contralto = registers[n]["contralto"]
 
     # Draw everything
     screen.fill(BLACK)
@@ -150,6 +197,13 @@ while running:
         text_surface = font.render(button["text"], True, BLACK)
         text_rect = text_surface.get_rect(center=(button["coords"][0], button["coords"][1]))
         screen.blit(text_surface, text_rect)
+    for n in range(len(registers)):
+        coords = (register_x + n * x_space, register_y)
+        image = registers[n]["image_b"] if current_register == registers[n]["banks"] else registers[n]["image"]
+        # why is this scaling not working?
+        image_scaled = pygame.transform.smoothscale(image, (CHORD_BUTTON_RADIUS*3/2, CHORD_BUTTON_RADIUS*3/2))
+        image_rect = image.get_rect(center=coords)
+        screen.blit(image_scaled, image_rect)
 
     pygame.display.flip()
 

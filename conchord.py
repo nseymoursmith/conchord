@@ -129,16 +129,61 @@ notes = counter_bass + root_notes + major_notes + minor_notes + seventh_notes
 names = cb_names + root_names + major_names + minor_names + seventh_names
 keys = cb_keys + root_keys + major_keys + minor_keys + seventh_keys
 
+
+class Button:
+    def __init__(self, coords, size, images, text, state):
+        self.coords = coords
+        self.size = size
+        self.images = images
+        self.text = text
+        self.state = state
+
+    def draw(self):
+        if self.images:
+            image = self.images[1] if self.state else self.images[0]
+            image_scaled = pygame.transform.smoothscale(image,
+                                                        (self.size, self.size))
+            image_rect = image.get_rect(center=self.coords)
+            screen.blit(image_scaled, image_rect)
+        else:
+            colour = WHITE if (self.state is False) else GREY
+            pygame.draw.circle(screen, colour, self.coords, self.size)
+        if self.text:
+            text_surface = font.render(self.text, True, BLACK)
+            text_rect = text_surface.get_rect(center=self.coords)
+            screen.blit(text_surface, text_rect)
+
+
+class NoteButton(Button):
+    def __init__(self, coords, size, images, text, notes, state):
+        super().__init__(coords, size, images, text, state)
+        self.notes = notes
+
+    def handle_switch(self, new_state, banks, shift, vel):
+        old_state = self.state
+        self.state = new_state
+        if self.state is not old_state:
+            message = 'note_on' if self.state else 'note_off'
+            for note in self.notes:
+                for octave in banks:
+                    active_note = note + 12 * (octave - (1 if shift else 0))
+                    msg = mido.Message(message, note=active_note, velocity=vel)
+                    output.send(msg)
+   
+
 chord_buttons = {}
 for i in range(len(keys)):
-    chord_buttons[keys[i]] = {"notes": notes[i],
-                              "text": names[i],
-                              "coords": coordinates[i],
-                              "keyboard": keys[i],
-                              "state": 'note_off'}
+    chord_buttons[keys[i]] = NoteButton(coordinates[i],
+                                        CHORD_BUTTON_RADIUS,
+                                        None,
+                                        names[i],
+                                        notes[i],
+                                        False)
+
 
 def radial_distance(centre, pointer):
     return math.sqrt((pointer[0] - centre[0])**2 + (pointer[1] - centre[1])**2)
+
 
 # Game loop
 running = True
@@ -149,25 +194,14 @@ while running:
         elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
             if event.key in chord_buttons:
                 button = chord_buttons[event.key]
-                print(button)
-                button["state"] = 'note_on' if event.type == pygame.KEYDOWN else 'note_off'
-                # Play/stop the chord
-                for note in button["notes"]:
-                    for octave in current_register:
-                        active_note = note + 12 * octave + 12 * (-1 if root_shift else 0)
-                        msg = mido.Message(button["state"], note=active_note, velocity=64)
-                        output.send(msg)
+                new_state = True if event.type == pygame.KEYDOWN else False
+                button.handle_switch(new_state, current_register, root_shift, 90)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
-                if (radial_distance(button["coords"], event.pos) < CHORD_BUTTON_RADIUS):
-                    print(button)
-                    button["state"] = 'note_on' if event.type == pygame.MOUSEBUTTONDOWN else 'note_off'
+                if (radial_distance(button.coords, event.pos) < button.size):
+                    new_state = True if event.type == pygame.MOUSEBUTTONDOWN else False
                     # Play/stop the chord
-                    for note in button["notes"]:
-                        for octave in current_register:
-                            active_note = note + 12 * octave + 12 * (-1 if root_shift else 0)
-                            msg = mido.Message(button["state"], note=active_note, velocity=64)
-                            output.send(msg)
+                    button.handle_switch(new_state, current_register, root_shift, 90)
             for n in range(len(registers)):
                 coords = (register_x + n * x_space, register_y)
                 if (radial_distance(coords, event.pos) < CHORD_BUTTON_RADIUS*3/4):
@@ -182,11 +216,7 @@ while running:
     # Draw everything
     screen.fill(BLACK)
     for key, button in chord_buttons.items():
-        colour = WHITE if button["state"] == 'note_off' else GREY
-        pygame.draw.circle(screen, colour, (button["coords"][0], button["coords"][1]), CHORD_BUTTON_RADIUS)
-        text_surface = font.render(button["text"], True, BLACK)
-        text_rect = text_surface.get_rect(center=(button["coords"][0], button["coords"][1]))
-        screen.blit(text_surface, text_rect)
+        button.draw()
     for n in range(len(registers)):
         coords = (register_x + n * x_space, register_y)
         image = registers[n]["image_b"] if current_register == registers[n]["banks"] else registers[n]["image"]

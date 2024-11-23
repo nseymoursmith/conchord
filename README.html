@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>README.html</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+</head>
+
+<body>
+
+<h1>Conchord: A keyboard &amp; mouse controlled MIDI stradella emulation</h1>
+<p><img alt="An image of the conchord program running. 5 rows of 12 keys, with one top row of register keys" src="documentation/conchord.png" title="conchord" /></p>
+<p>Info on the accordion stradella layout that this emulates can be found <a href="https://en.wikipedia.org/wiki/Stradella_bass_system">here</a>.</p>
+<h2>Installation</h2>
+<p>Create a python virtual environment with your tool of choice, and install the necessary libraries from the <code>requirements.txt</code> file:</p>
+<p><code>pip install -r requirements.txt</code></p>
+<h2>Operation</h2>
+<p>Activate your virtual environment, and run conchord using <code>python</code>:</p>
+<p><code>python conchord.py</code></p>
+<p><strong>Be aware that conchord is a MIDI instrument, and generates no sound of its own!</strong></p>
+<p>Conchord outputs software MIDI messages which can be sent to your software synthesizer of choice.</p>
+<p>In the following diagram <code>Ubuntu Studio</code> (version 24+ for significantly less configuration challenges) provides connections between software MIDI 'devices' using the <code>patchance</code> program.</p>
+<p><img alt="Diagram showing MIDI connections made using patchance program" src="documentation/patchance.png" title="patchance" /></p>
+<p>Here I'm using a MIDI controller (<code>faderfox EC4</code>) to provide MIDI expression control to conchord (labelled as <code>RtMidiIn/Out Client</code>), and outputting MIDI from conchord to the qsynth synthesizer, which generates the sounds sent to my speakers.</p>
+<p>This relies on configuration of <code>JACK</code> and <code>ALSA</code> or <code>pipewire</code> servers that is provided out of the box in <code>Ubuntu Studio 24+</code> (and probably some other linux distributions), but not by default for most linux distributions.</p>
+<p>I haven't tested this on Windows yet. It might work, who knows what the magic of python is capable of.</p>
+<h2>MIDI</h2>
+<p>By default conchord sends MIDI messages on MIDI channel <code>0</code>.</p>
+<p>Conchord also /listens/ for MIDI expression (CC 11) messages, by default on channel <code>0</code>. It will interpret the <code>value</code> of these messages as the <code>velocity</code> to play notes with.</p>
+<p>Both the input and output MIDI channels can be changed manually in <code>conchord.py</code></p>
+<h2>Buttons</h2>
+<p>Conchord is fully mouse controllable, although that's an awful way to control it. Nevertheless it does make it easier to get familiar with the layout and functions, illustrated below:</p>
+<p><img alt="Labelled diagram showing the function of each row of the player" src="documentation/conchord_functions.png" title="functions" /></p>
+<h3>Register switches (top row)</h3>
+<p>The top row contains the <code>Octave Shift</code> button and the <code>Register Switches</code>. For information on the function of the <code>Register Switches</code> see <a href="https://en.wikipedia.org/wiki/Stradella_bass_system#Register_switches">here</a>. Since it is a virtual accordion, conchord emulates additional reed ranks by adding duplicates of the button's notes in higher or lower octaves. The characteristic contralto sound/detuned-reed interaction can't be emulated in MIDI, so conchord simply doubles the tenor line to add more body to the sound (if a contralto register is selected).</p>
+<p>The <code>Octave Shift</code> button is not present on a real stradella layout, but I've added it because different MIDI voices sound better at higher or lower octaves. When the <code>Octave Shift</code> is on (background black, default), all notes are shifted down an octave compared to when it is off (background white).</p>
+<h3>Root Bass (third row)</h3>
+<p>The third row contains the <code>Root Bass</code> notes. Pressing any of these buttons plays a single note (which may be doubled at higher or lower octaves, according to the selected register switch). This note is also the <code>Root</code> note of the chord buttons the rows below.</p>
+<h3>Counter Bass (second row)</h3>
+<p>The notes in the second row are a major third above the <code>Root Bass</code> notes that they correspond to. Pressing any of these buttons plays a single note (which may be doubled at higher or lower octaves, according to the selected register switch).</p>
+<h3>Major Triad (fourth row)</h3>
+<p>The buttons on the fourth row play a major triad based on the <code>Root Bass</code> above it i.e. root + major third + major fifth. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch).</p>
+<h3>Minor Triad (fifth row)</h3>
+<p>The buttons on the fourth row play a minor triad based on the <code>Root Bass</code> above it i.e. root + minor third + major fifth. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch).</p>
+<h3>Dominant Seventh (sixth row)</h3>
+<p>The buttons on the fourth row play a dominant seventh based on the <code>Root Bass</code> above it. This seventh is missing the major fifth i.e. root + minor third + flat seventh. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch).</p>
+<h2>Keyboard</h2>
+<p>All of the note buttons (second row down) are mapped to keyboard buttons (UK QWERTY layout):</p>
+<p><img alt="keyboard mapping" src="documentation/conchord_keys.png" /></p>
+<p>The counter bass row is controlled using the function keys (<code>F1</code> - <code>F12</code>).</p>
+<p>The root bass row is controlled using the number row (<code>1</code> - <code>=)</code></p>
+<p>The major triad row is controlled using the qwerty row (<code>q</code> - <code>]</code>)</p>
+<p>The minor triad row is controlled using the asdf row (<code>a</code> - <code>#</code>)</p>
+<p>The dominant seventh row is controlled using the zxcv row (<code>z</code> - <code>?</code>). Since this row is shorter than the others, there are no keys for <code>B7</code> and <code>F#7</code>, and they can only be played by mouse.</p>
+</body>
+</html>

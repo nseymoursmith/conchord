@@ -74,14 +74,17 @@ class NoteButton(Button):
         super().__init__(coords, size, images, text, state)
         self.notes = notes
 
-    def handle_switch(self, new_state, banks, shift, vel):
+    def handle_switch(self, new_state, banks, shift, midi_chan, vel):
         if self.state is not new_state:
             self.state = new_state
             message = 'note_on' if self.state else 'note_off'
             for note in self.notes:
                 for octave in banks:
                     active_note = note + 12 * (octave - (1 if shift else 0))
-                    msg = mido.Message(message, note=active_note, velocity=vel)
+                    msg = mido.Message(message,
+                                       channel=midi_chan,
+                                       note=active_note,
+                                       velocity=vel)
                     output.send(msg)
 
 
@@ -226,12 +229,14 @@ def reset_registers(registers, active):
 
 
 current_vel = 90
+midi_out_channel = 0
+midi_in_channel = 0
 
 # Game loop
 running = True
 while running:
     for message in midi_input.iter_pending():
-        if message.is_cc(11):
+        if message.is_cc(11) and message.channel == midi_in_channel:
             current_vel = message.value
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -243,6 +248,7 @@ while running:
                 button.handle_switch(new_state,
                                      current_register,
                                      octave_shift.state,
+                                     midi_out_channel,
                                      current_vel)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
@@ -251,6 +257,7 @@ while running:
                     button.handle_switch(new_state,
                                          current_register,
                                          octave_shift.state,
+                                         midi_out_channel,
                                          current_vel)
             for key, button in register_buttons.items():
                 if (button_clicked(button, event) and activation_event(event)):

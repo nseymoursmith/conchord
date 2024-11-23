@@ -10,6 +10,7 @@ WIDTH, HEIGHT = 1450, 850
 WHITE = (255, 255, 255)
 GREY = (127, 127, 127)
 BLACK = (0, 0, 0)
+TEAL = (0, 127, 127)
 CHORD_BUTTON_RADIUS = 40
 
 bass_x = 100
@@ -40,73 +41,6 @@ output = mido.open_output()
 rows = 5
 columns = 12
 root_shift = True
-shift_off = pygame.image.load("octave.png")
-shift_on = pygame.image.load("octave_b.png")
-
-
-# registers
-soprano = [2]
-alto = [2, 1]
-tenor = [2, 1, 0]
-soft_tenor = [1, 0]
-master = [2, 1, 0, 0, -1]
-soft_bass = [0, 0, -1]
-bass_alto = [2, 1, -1]
-
-current_register = soft_bass
-
-# Db leftmost bass
-root_notes_lower = [[61 + 2 * i] for i in range(int(columns/2))]
-
-# Ab major fourth below
-root_notes_higher = [[56 + 2 * i] for i in range(int(columns/2))]
-
-root_notes = root_notes_lower + root_notes_higher
-# Interleave to get major fourth major fifth alternating
-root_notes[::2] = root_notes_lower
-root_notes[1::2] = root_notes_higher
-root_names = ["Db", "Ab", "Eb", "Bb", "F", "C", "G", "D", "A", "E", "B", "F#"]
-root_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
-             pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8,
-             pygame.K_9, pygame.K_0, pygame.K_MINUS, pygame.K_EQUALS]
-
-counter_bass = [[n[0] + 4] for n in root_notes]
-cb_names = ["F", "C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#"]
-cb_keys = [pygame.K_F1, pygame.K_F2, pygame.K_F3, pygame.K_F4,
-           pygame.K_F5, pygame.K_F6, pygame.K_F7, pygame.K_F8,
-           pygame.K_F9, pygame.K_F10, pygame.K_F11, pygame.K_F12]
-
-major_notes = [list(map(lambda x: x + n[0] + 12, (0, 4, 7)))
-               for n in root_notes]
-major_names = [f"{root_name}M" for root_name in root_names]
-major_keys = [pygame.K_q, pygame.K_w, pygame.K_e, pygame.K_r,
-              pygame.K_t, pygame.K_y, pygame.K_u, pygame.K_i,
-              pygame.K_o, pygame.K_p, pygame.K_LEFTBRACKET,
-              pygame.K_RIGHTBRACKET]
-
-minor_notes = [list(map(lambda x: x + n[0] + 12, (0, 3, 7)))
-               for n in root_notes]
-minor_names = [f"{root_name}m" for root_name in root_names]
-minor_keys = [pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f,
-              pygame.K_g, pygame.K_h, pygame.K_j, pygame.K_k,
-              pygame.K_l, pygame.K_SEMICOLON, pygame.K_QUOTE, pygame.K_HASH]
-
-seventh_notes = [list(map(lambda x: x + n[0] + 12, (0, 4, 10)))
-                 for n in root_notes]
-seventh_names = [f"{root_name}7" for root_name in root_names]
-seventh_keys = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v,
-                pygame.K_b, pygame.K_n, pygame.K_m, pygame.K_COMMA,
-                pygame.K_PERIOD, pygame.K_SLASH, pygame.K_F14, pygame.K_F15]
-
-
-coordinates = [(bass_x + (n % columns)*x_space + math.floor(n / columns)*x_space/3,
-                bass_y + math.floor(n / columns)*y_space)
-               for n in range(rows * columns)]
-
-notes = counter_bass + root_notes + major_notes + minor_notes + seventh_notes
-names = cb_names + root_names + major_names + minor_names + seventh_names
-keys = cb_keys + root_keys + major_keys + minor_keys + seventh_keys
-
 
 class Button:
     def __init__(self, coords, size, images, text, state):
@@ -163,6 +97,58 @@ class RegisterButton(Button):
             return self.banks if self.state else None
 
 
+# Db leftmost bass
+root_notes_lower = [[61 + 2 * i] for i in range(int(columns/2))]
+
+# Ab major fourth below
+root_notes_higher = [[56 + 2 * i] for i in range(int(columns/2))]
+
+root_notes = root_notes_lower + root_notes_higher
+# Interleave to get major fourth major fifth alternating
+root_notes[::2] = root_notes_lower
+root_notes[1::2] = root_notes_higher
+root_names = ["Db", "Ab", "Eb", "Bb", "F", "C", "G", "D", "A", "E", "B", "F#"]
+root_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
+             pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8,
+             pygame.K_9, pygame.K_0, pygame.K_MINUS, pygame.K_EQUALS]
+
+counter_bass = [[n[0] + 4] for n in root_notes]
+cb_names = ["F", "C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#"]
+cb_keys = [pygame.K_F1, pygame.K_F2, pygame.K_F3, pygame.K_F4,
+           pygame.K_F5, pygame.K_F6, pygame.K_F7, pygame.K_F8,
+           pygame.K_F9, pygame.K_F10, pygame.K_F11, pygame.K_F12]
+
+major_notes = [list(map(lambda x: x + n[0] + 12, (0, 4, 7)))
+               for n in root_notes]
+major_names = [f"{root_name}M" for root_name in root_names]
+major_keys = [pygame.K_q, pygame.K_w, pygame.K_e, pygame.K_r,
+              pygame.K_t, pygame.K_y, pygame.K_u, pygame.K_i,
+              pygame.K_o, pygame.K_p, pygame.K_LEFTBRACKET,
+              pygame.K_RIGHTBRACKET]
+
+minor_notes = [list(map(lambda x: x + n[0] + 12, (0, 3, 7)))
+               for n in root_notes]
+minor_names = [f"{root_name}m" for root_name in root_names]
+minor_keys = [pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f,
+              pygame.K_g, pygame.K_h, pygame.K_j, pygame.K_k,
+              pygame.K_l, pygame.K_SEMICOLON, pygame.K_QUOTE, pygame.K_HASH]
+
+seventh_notes = [list(map(lambda x: x + n[0] + 12, (0, 4, 10)))
+                 for n in root_notes]
+seventh_names = [f"{root_name}7" for root_name in root_names]
+seventh_keys = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v,
+                pygame.K_b, pygame.K_n, pygame.K_m, pygame.K_COMMA,
+                pygame.K_PERIOD, pygame.K_SLASH, pygame.K_F14, pygame.K_F15]
+
+
+coordinates = [(bass_x + (n % columns)*x_space + math.floor(n / columns)*x_space/3,
+                bass_y + math.floor(n / columns)*y_space)
+               for n in range(rows * columns)]
+
+notes = counter_bass + root_notes + major_notes + minor_notes + seventh_notes
+names = cb_names + root_names + major_names + minor_names + seventh_names
+keys = cb_keys + root_keys + major_keys + minor_keys + seventh_keys
+
 chord_buttons = {}
 for i in range(len(keys)):
     chord_buttons[keys[i]] = NoteButton(coordinates[i],
@@ -171,6 +157,16 @@ for i in range(len(keys)):
                                         names[i],
                                         notes[i],
                                         False)
+# registers
+soprano = [2]
+alto = [2, 1]
+tenor = [2, 1, 0]
+soft_tenor = [1, 0]
+master = [2, 1, 0, 0, -1]
+soft_bass = [0, 0, -1]
+bass_alto = [2, 1, -1]
+
+current_register = soft_bass
 
 register_images = [[pygame.image.load("soprano.png"),
                     pygame.image.load("soprano_b.png")],
@@ -187,7 +183,7 @@ register_images = [[pygame.image.load("soprano.png"),
                    [pygame.image.load("bass-alto.png"),
                     pygame.image.load("bass-alto_b.png")]]
 
-banks = [soprano, alto, tenor, soft_tenor, master, soft_bass, bass_alto]
+register_banks = [soprano, alto, tenor, soft_tenor, master, soft_bass, bass_alto]
 register_keys = [pygame.K_F2, pygame.K_F3, pygame.K_F4, pygame.K_F5,
                  pygame.K_F6, pygame.K_F7, pygame.K_F8]
 
@@ -197,8 +193,15 @@ for i in range(len(register_keys)):
                                                         CHORD_BUTTON_RADIUS*3/2,
                                                         register_images[i],
                                                         None,
-                                                        banks[i],
+                                                        register_banks[i],
                                                         True if i == 5 else False)  # soft bass default
+
+octave_shift = Button((register_x - x_space * 1.5, register_y),
+                      CHORD_BUTTON_RADIUS*3/2,
+                      [pygame.image.load("octave.png"),
+                       pygame.image.load("octave_b.png")],
+                      None,
+                      True)
 
 
 def radial_distance(centre, pointer):
@@ -223,31 +226,34 @@ while running:
             if event.key in chord_buttons:
                 button = chord_buttons[event.key]
                 new_state = event.type == pygame.KEYDOWN
-                button.handle_switch(new_state, current_register, root_shift, 90)
+                button.handle_switch(new_state,
+                                     current_register,
+                                     octave_shift.state,
+                                     90)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
                 if (radial_distance(button.coords, event.pos) < button.size):
                     new_state = event.type == pygame.MOUSEBUTTONDOWN
-                    button.handle_switch(new_state, current_register, root_shift, 90)
+                    button.handle_switch(new_state,
+                                         current_register,
+                                         octave_shift.state,
+                                         90)
             for key, button in register_buttons.items():
                 if (radial_distance(button.coords, event.pos) < button.size
                         and event.type == pygame.MOUSEBUTTONDOWN):
                     current_register = reset_registers(register_buttons, key)
             if (event.type == pygame.MOUSEBUTTONDOWN and
-                radial_distance((register_x - x_space * 1.5, register_y), event.pos)
-                < CHORD_BUTTON_RADIUS*3/4):
-                root_shift = not root_shift
+                radial_distance(octave_shift.coords, event.pos)
+                    < octave_shift.size):
+                octave_shift.handle_switch(not octave_shift.state)
 
     # Draw everything
-    screen.fill(BLACK)
+    screen.fill(TEAL)
     for key, button in chord_buttons.items():
         button.draw()
     for key, button in register_buttons.items():
         button.draw()
-    image = shift_on if root_shift else shift_off
-    image_scaled = pygame.transform.smoothscale(image, (CHORD_BUTTON_RADIUS*3/2, CHORD_BUTTON_RADIUS*3/2))
-    image_rect = image.get_rect(center=(register_x - x_space * 1.5, register_y))
-    screen.blit(image_scaled, image_rect)
+    octave_shift.draw()
 
     pygame.display.flip()
 

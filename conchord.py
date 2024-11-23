@@ -210,11 +210,11 @@ def radial_distance(centre, pointer):
     return math.sqrt((pointer[0] - centre[0])**2 + (pointer[1] - centre[1])**2)
 
 
-def button_clicked(button, event):
+def mouse_over(button, event):
     return radial_distance(button.coords, event.pos) < button.size
 
 
-def activation_event(event):
+def is_push(event):
     return event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]
 
 
@@ -244,7 +244,7 @@ while running:
         elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
             if event.key in chord_buttons:
                 button = chord_buttons[event.key]
-                new_state = activation_event(event)
+                new_state = is_push(event)
                 button.handle_switch(new_state,
                                      current_register,
                                      octave_shift.state,
@@ -252,17 +252,17 @@ while running:
                                      current_vel)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
-                if button_clicked(button, event):
-                    new_state = activation_event(event)
+                if mouse_over(button, event):
+                    new_state = is_push(event)
                     button.handle_switch(new_state,
                                          current_register,
                                          octave_shift.state,
                                          midi_out_channel,
                                          current_vel)
             for key, button in register_buttons.items():
-                if (button_clicked(button, event) and activation_event(event)):
+                if (mouse_over(button, event) and is_push(event)):
                     current_register = reset_registers(register_buttons, key)
-            if (button_clicked(octave_shift, event) and activation_event(event)):
+            if (mouse_over(octave_shift, event) and is_push(event)):
                 octave_shift.handle_switch(not octave_shift.state)
 
     # Draw everything

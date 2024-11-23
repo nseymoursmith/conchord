@@ -12,9 +12,38 @@
 
 <body>
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+<p><strong>Table of Contents</strong></p>
+<ul>
+<li><a href="#conchord-a-keyboard--mouse-controlled-midi-stradella-emulation">Conchord: A keyboard &amp; mouse controlled MIDI stradella emulation</a><ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#operation">Operation</a></li>
+<li><a href="#midi">MIDI</a></li>
+<li><a href="#buttons">Buttons</a><ul>
+<li><a href="#register-switches-top-row">Register switches (top row)</a></li>
+<li><a href="#root-bass-third-row">Root Bass (third row)</a></li>
+<li><a href="#counter-bass-second-row">Counter Bass (second row)</a></li>
+<li><a href="#major-triad-fourth-row">Major Triad (fourth row)</a></li>
+<li><a href="#minor-triad-fifth-row">Minor Triad (fifth row)</a></li>
+<li><a href="#dominant-seventh-sixth-row">Dominant Seventh (sixth row)</a></li>
+</ul>
+</li>
+<li><a href="#keyboard">Keyboard</a></li>
+</ul>
+</li>
+</ul>
+<!-- markdown-toc end -->
+
 <h1>Conchord: A keyboard &amp; mouse controlled MIDI stradella emulation</h1>
+<h2>Introduction</h2>
 <p><img alt="An image of the conchord program running. 5 rows of 12 keys, with one top row of register keys" src="documentation/conchord.png" title="conchord" /></p>
 <p>Info on the accordion stradella layout that this emulates can be found <a href="https://en.wikipedia.org/wiki/Stradella_bass_system">here</a>.</p>
+<p>This virtual button board is designed to be used directly from a computer keyboard, with a midi controller providing velocity control if needed. You can control it with a mouse too.</p>
+<p>But why would you do this? I hear you ask. </p>
+<p>Why not buy an accordion, or a v-accordion?</p>
+<p>Because I suffer from chronic pain, and most physical instruments are impossible for me to play. However most of the time, a computer keyboard isn't. Additionally the stradella layout (and the isomorphic button layout of the right hand of button the accordion, which I might make later) is a really good layout for simple accompaniement.</p>
+<p>So I made this.</p>
 <h2>Installation</h2>
 <p>Create a python virtual environment with your tool of choice, and install the necessary libraries from the <code>requirements.txt</code> file:</p>
 <p><code>pip install -r requirements.txt</code></p>
@@ -39,22 +68,22 @@
 <p>The top row contains the <code>Octave Shift</code> button and the <code>Register Switches</code>. For information on the function of the <code>Register Switches</code> see <a href="https://en.wikipedia.org/wiki/Stradella_bass_system#Register_switches">here</a>. Since it is a virtual accordion, conchord emulates additional reed ranks by adding duplicates of the button's notes in higher or lower octaves. The characteristic contralto sound/detuned-reed interaction can't be emulated in MIDI, so conchord simply doubles the tenor line to add more body to the sound (if a contralto register is selected).</p>
 <p>The <code>Octave Shift</code> button is not present on a real stradella layout, but I've added it because different MIDI voices sound better at higher or lower octaves. When the <code>Octave Shift</code> is on (background black, default), all notes are shifted down an octave compared to when it is off (background white).</p>
 <h3>Root Bass (third row)</h3>
-<p>The third row contains the <code>Root Bass</code> notes. Pressing any of these buttons plays a single note (which may be doubled at higher or lower octaves, according to the selected register switch). This note is also the <code>Root</code> note of the chord buttons the rows below.</p>
+<p>The third row contains the <code>Root Bass</code> notes. Pressing any of these buttons plays a single note (which may be doubled at higher or lower octaves, according to the selected register switch). This note is also the <code>Root</code> note of the chord buttons in the rows below.</p>
 <h3>Counter Bass (second row)</h3>
 <p>The notes in the second row are a major third above the <code>Root Bass</code> notes that they correspond to. Pressing any of these buttons plays a single note (which may be doubled at higher or lower octaves, according to the selected register switch).</p>
 <h3>Major Triad (fourth row)</h3>
-<p>The buttons on the fourth row play a major triad based on the <code>Root Bass</code> above it i.e. root + major third + major fifth. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch).</p>
+<p>The buttons on the fourth row play a major triad based on the <code>Root Bass</code> above it i.e. root + major third + major fifth. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch.</p>
 <h3>Minor Triad (fifth row)</h3>
-<p>The buttons on the fourth row play a minor triad based on the <code>Root Bass</code> above it i.e. root + minor third + major fifth. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch).</p>
+<p>The buttons on the fifth row play a minor triad based on the <code>Root Bass</code> above it i.e. root + minor third + major fifth. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch.</p>
 <h3>Dominant Seventh (sixth row)</h3>
-<p>The buttons on the fourth row play a dominant seventh based on the <code>Root Bass</code> above it. This seventh is missing the major fifth i.e. root + minor third + flat seventh. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch).</p>
+<p>The buttons on the sixth row play a dominant seventh based on the <code>Root Bass</code> above it. This seventh is missing the major fifth i.e. root + major third + flat seventh. Each note in this chord may be doubled at higher or lower octaves, according to the selected register switch.</p>
 <h2>Keyboard</h2>
-<p>All of the note buttons (second row down) are mapped to keyboard buttons (UK QWERTY layout):</p>
+<p>All of the note buttons (second row down) are mapped to keyboard buttons (this assumes a UK QWERTY layout, but you could modify the mapping in <code>stradella.py</code>):</p>
 <p><img alt="keyboard mapping" src="documentation/conchord_keys.png" /></p>
 <p>The counter bass row is controlled using the function keys (<code>F1</code> - <code>F12</code>).</p>
-<p>The root bass row is controlled using the number row (<code>1</code> - <code>=)</code></p>
-<p>The major triad row is controlled using the qwerty row (<code>q</code> - <code>]</code>)</p>
-<p>The minor triad row is controlled using the asdf row (<code>a</code> - <code>#</code>)</p>
-<p>The dominant seventh row is controlled using the zxcv row (<code>z</code> - <code>?</code>). Since this row is shorter than the others, there are no keys for <code>B7</code> and <code>F#7</code>, and they can only be played by mouse.</p>
+<p>The root bass row is controlled using the number row (<code>1</code> - <code>=</code>)</p>
+<p>The major triad row is controlled using the <code>qwerty</code> row (<code>q</code> - <code>]</code>)</p>
+<p>The minor triad row is controlled using the <code>asdf</code> row (<code>a</code> - <code>#</code>)</p>
+<p>The dominant seventh row is controlled using the <code>zxcv</code> row (<code>z</code> - <code>/</code>). Since this row is shorter than the others, there are no keys for <code>B7</code> and <code>F#7</code>, and they can only be played by mouse.</p>
 </body>
 </html>

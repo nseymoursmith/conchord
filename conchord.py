@@ -19,7 +19,8 @@ x_space = 100
 y_space = 100
 register_x = 350
 register_y = 100
-
+rows = 5
+columns = 12
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -27,8 +28,9 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # Set up the font
 font = pygame.font.Font(None, 36)
 
-# Set up the MIDI output port
+# Set up the MIDI ports
 output = mido.open_output()
+midi_input = mido.open_input()
 
 # Reference chord intervals (from root)
 #
@@ -38,9 +40,6 @@ output = mido.open_output()
 #     "dim7": [-3, 0, 3],
 #
 
-rows = 5
-columns = 12
-root_shift = True
 
 class Button:
     def __init__(self, coords, size, images, text, state):
@@ -208,7 +207,16 @@ def radial_distance(centre, pointer):
     return math.sqrt((pointer[0] - centre[0])**2 + (pointer[1] - centre[1])**2)
 
 
+def button_clicked(button, event):
+    return radial_distance(button.coords, event.pos) < button.size
+
+
+def activation_event(event):
+    return event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]
+
+
 def reset_registers(registers, active):
+    print(active)
     active_banks = None
     for key, button in registers.items():
         state = True if key == active else False
@@ -216,35 +224,38 @@ def reset_registers(registers, active):
         active_banks = active_banks or bank_change
     return active_banks
 
+
+current_vel = 90
+
 # Game loop
 running = True
 while running:
+    for message in midi_input.iter_pending():
+        if message.is_cc(11):
+            current_vel = message.value
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
             if event.key in chord_buttons:
                 button = chord_buttons[event.key]
-                new_state = event.type == pygame.KEYDOWN
+                new_state = activation_event(event)
                 button.handle_switch(new_state,
                                      current_register,
                                      octave_shift.state,
-                                     90)
+                                     current_vel)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
-                if (radial_distance(button.coords, event.pos) < button.size):
-                    new_state = event.type == pygame.MOUSEBUTTONDOWN
+                if button_clicked(button, event):
+                    new_state = activation_event(event)
                     button.handle_switch(new_state,
                                          current_register,
                                          octave_shift.state,
-                                         90)
+                                         current_vel)
             for key, button in register_buttons.items():
-                if (radial_distance(button.coords, event.pos) < button.size
-                        and event.type == pygame.MOUSEBUTTONDOWN):
+                if (button_clicked(button, event) and activation_event(event)):
                     current_register = reset_registers(register_buttons, key)
-            if (event.type == pygame.MOUSEBUTTONDOWN and
-                radial_distance(octave_shift.coords, event.pos)
-                    < octave_shift.size):
+            if (button_clicked(octave_shift, event) and activation_event(event)):
                 octave_shift.handle_switch(not octave_shift.state)
 
     # Draw everything

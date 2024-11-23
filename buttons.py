@@ -12,29 +12,27 @@ def radial_distance(centre, pointer):
 
 
 class Button:
-    def __init__(self, coords, size, images, text, state, screen, font):
+    def __init__(self, coords, size, images, text, state):
         self.coords = coords
         self.size = size
         self.images = images
         self.text = text
         self.state = state
-        self.screen = screen
-        self.font = font
 
-    def draw(self):
+    def draw(self, screen, font):
         if self.images:
             image = self.images[1] if self.state else self.images[0]
             image_scaled = pygame.transform.smoothscale(image,
                                                         (self.size, self.size))
             image_rect = image.get_rect(center=self.coords)
-            self.screen.blit(image_scaled, image_rect)
+            screen.blit(image_scaled, image_rect)
         else:
             colour = WHITE if (self.state is False) else GREY
-            pygame.draw.circle(self.screen, colour, self.coords, self.size)
+            pygame.draw.circle(screen, colour, self.coords, self.size)
         if self.text:
-            text_surface = self.font.render(self.text, True, BLACK)
+            text_surface = font.render(self.text, True, BLACK)
             text_rect = text_surface.get_rect(center=self.coords)
-            self.screen.blit(text_surface, text_rect)
+            screen.blit(text_surface, text_rect)
 
     def mouse_over(self, event):
         return radial_distance(self.coords, event.pos) < self.size
@@ -45,12 +43,11 @@ class Button:
 
 
 class NoteButton(Button):
-    def __init__(self, coords, size, images, text, notes, state, output, screen, font):
-        super().__init__(coords, size, images, text, state, screen, font)
+    def __init__(self, coords, size, images, text, notes, state):
+        super().__init__(coords, size, images, text, state)
         self.notes = notes
-        self.output = output
 
-    def handle_switch(self, new_state, banks, shift, midi_chan, vel):
+    def handle_switch(self, new_state, banks, shift, midi_chan, vel, output):
         if self.state is not new_state:
             self.state = new_state
             message = 'note_on' if self.state else 'note_off'
@@ -61,12 +58,12 @@ class NoteButton(Button):
                                        channel=midi_chan,
                                        note=active_note,
                                        velocity=vel)
-                    self.output.send(msg)
+                    output.send(msg)
 
 
 class RegisterButton(Button):
-    def __init__(self, coords, size, images, text, banks, state, screen, font):
-        super().__init__(coords, size, images, text, state, screen, font)
+    def __init__(self, coords, size, images, text, banks, state):
+        super().__init__(coords, size, images, text, state)
         self.banks = banks
 
     def handle_switch(self, new_state):

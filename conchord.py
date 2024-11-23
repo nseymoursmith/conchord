@@ -53,28 +53,6 @@ master = [2, 1, 0, 0, -1]
 soft_bass = [0, 0, -1]
 bass_alto = [2, 1, -1]
 
-registers = [{"image": pygame.image.load("soprano.png"),
-              "image_b": pygame.image.load("soprano_b.png"),
-              "banks": soprano},
-             {"image": pygame.image.load("alto.png"),
-              "image_b": pygame.image.load("alto_b.png"),
-              "banks": alto},
-             {"image": pygame.image.load("tenor.png"),
-              "image_b": pygame.image.load("tenor_b.png"),
-              "banks": tenor},
-             {"image": pygame.image.load("soft_tenor.png"),
-              "image_b": pygame.image.load("soft_tenor_b.png"),
-              "banks": soft_tenor},
-             {"image": pygame.image.load("master.png"),
-              "image_b": pygame.image.load("master_b.png"),
-              "banks": master},
-             {"image": pygame.image.load("soft_bass.png"),
-              "image_b": pygame.image.load("soft_bass_b.png"),
-              "banks": soft_bass},
-             {"image": pygame.image.load("bass-alto.png"),
-              "image_b": pygame.image.load("bass-alto_b.png"),
-              "banks": bass_alto}]
-
 current_register = soft_bass
 
 # Db leftmost bass
@@ -153,6 +131,10 @@ class Button:
             text_rect = text_surface.get_rect(center=self.coords)
             screen.blit(text_surface, text_rect)
 
+    def handle_switch(self, new_state):
+        if self.state is not new_state:
+            self.state = new_state
+
 
 class NoteButton(Button):
     def __init__(self, coords, size, images, text, notes, state):
@@ -160,16 +142,26 @@ class NoteButton(Button):
         self.notes = notes
 
     def handle_switch(self, new_state, banks, shift, vel):
-        old_state = self.state
-        self.state = new_state
-        if self.state is not old_state:
+        if self.state is not new_state:
+            self.state = new_state
             message = 'note_on' if self.state else 'note_off'
             for note in self.notes:
                 for octave in banks:
                     active_note = note + 12 * (octave - (1 if shift else 0))
                     msg = mido.Message(message, note=active_note, velocity=vel)
                     output.send(msg)
-   
+
+
+class RegisterButton(Button):
+    def __init__(self, coords, size, images, text, banks, state):
+        super().__init__(coords, size, images, text, state)
+        self.banks = banks
+
+    def handle_switch(self, new_state):
+        if self.state is not new_state:
+            self.state = new_state
+            return self.banks if self.state else None
+
 
 chord_buttons = {}
 for i in range(len(keys)):
@@ -180,10 +172,46 @@ for i in range(len(keys)):
                                         notes[i],
                                         False)
 
+register_images = [[pygame.image.load("soprano.png"),
+                    pygame.image.load("soprano_b.png")],
+                   [pygame.image.load("alto.png"),
+                    pygame.image.load("alto_b.png")],
+                   [pygame.image.load("tenor.png"),
+                    pygame.image.load("tenor_b.png")],
+                   [pygame.image.load("soft_tenor.png"),
+                    pygame.image.load("soft_tenor_b.png")],
+                   [pygame.image.load("master.png"),
+                    pygame.image.load("master_b.png")],
+                   [pygame.image.load("soft_bass.png"),
+                    pygame.image.load("soft_bass_b.png")],
+                   [pygame.image.load("bass-alto.png"),
+                    pygame.image.load("bass-alto_b.png")]]
+
+banks = [soprano, alto, tenor, soft_tenor, master, soft_bass, bass_alto]
+register_keys = [pygame.K_F2, pygame.K_F3, pygame.K_F4, pygame.K_F5,
+                 pygame.K_F6, pygame.K_F7, pygame.K_F8]
+
+register_buttons = {}
+for i in range(len(register_keys)):
+    register_buttons[register_keys[i]] = RegisterButton((register_x + i * x_space, register_y),
+                                                        CHORD_BUTTON_RADIUS*3/2,
+                                                        register_images[i],
+                                                        None,
+                                                        banks[i],
+                                                        True if i == 5 else False)  # soft bass default
+
 
 def radial_distance(centre, pointer):
     return math.sqrt((pointer[0] - centre[0])**2 + (pointer[1] - centre[1])**2)
 
+
+def reset_registers(registers, active):
+    active_banks = None
+    for key, button in registers.items():
+        state = True if key == active else False
+        bank_change = button.handle_switch(state)
+        active_banks = active_banks or bank_change
+    return active_banks
 
 # Game loop
 running = True
@@ -194,20 +222,17 @@ while running:
         elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
             if event.key in chord_buttons:
                 button = chord_buttons[event.key]
-                new_state = True if event.type == pygame.KEYDOWN else False
+                new_state = event.type == pygame.KEYDOWN
                 button.handle_switch(new_state, current_register, root_shift, 90)
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             for key, button in chord_buttons.items():
                 if (radial_distance(button.coords, event.pos) < button.size):
-                    new_state = True if event.type == pygame.MOUSEBUTTONDOWN else False
-                    # Play/stop the chord
+                    new_state = event.type == pygame.MOUSEBUTTONDOWN
                     button.handle_switch(new_state, current_register, root_shift, 90)
-            for n in range(len(registers)):
-                coords = (register_x + n * x_space, register_y)
-                if (radial_distance(coords, event.pos) < CHORD_BUTTON_RADIUS*3/4):
-                    banks = registers[n]["banks"]
-                    print(banks)
-                    current_register = banks
+            for key, button in register_buttons.items():
+                if (radial_distance(button.coords, event.pos) < button.size
+                        and event.type == pygame.MOUSEBUTTONDOWN):
+                    current_register = reset_registers(register_buttons, key)
             if (event.type == pygame.MOUSEBUTTONDOWN and
                 radial_distance((register_x - x_space * 1.5, register_y), event.pos)
                 < CHORD_BUTTON_RADIUS*3/4):
@@ -217,12 +242,8 @@ while running:
     screen.fill(BLACK)
     for key, button in chord_buttons.items():
         button.draw()
-    for n in range(len(registers)):
-        coords = (register_x + n * x_space, register_y)
-        image = registers[n]["image_b"] if current_register == registers[n]["banks"] else registers[n]["image"]
-        image_scaled = pygame.transform.smoothscale(image, (CHORD_BUTTON_RADIUS*3/2, CHORD_BUTTON_RADIUS*3/2))
-        image_rect = image.get_rect(center=coords)
-        screen.blit(image_scaled, image_rect)
+    for key, button in register_buttons.items():
+        button.draw()
     image = shift_on if root_shift else shift_off
     image_scaled = pygame.transform.smoothscale(image, (CHORD_BUTTON_RADIUS*3/2, CHORD_BUTTON_RADIUS*3/2))
     image_rect = image.get_rect(center=(register_x - x_space * 1.5, register_y))

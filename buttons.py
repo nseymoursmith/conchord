@@ -7,10 +7,6 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 
-def radial_distance(centre, pointer):
-    return math.sqrt((pointer[0] - centre[0])**2 + (pointer[1] - centre[1])**2)
-
-
 class Button:
     def __init__(self, coords, size, images, text, state):
         self.coords = coords
@@ -34,8 +30,15 @@ class Button:
             text_rect = text_surface.get_rect(center=self.coords)
             screen.blit(text_surface, text_rect)
 
+    def radial_distance(self, centre, pointer):
+        return math.sqrt((pointer[0] - centre[0])**2 +
+                         (pointer[1] - centre[1])**2)
+
+    def is_push(self, event):
+        return event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]
+
     def mouse_over(self, event):
-        return radial_distance(self.coords, event.pos) < self.size
+        return self.radial_distance(self.coords, event.pos) < self.size
 
     def handle_switch(self, new_state):
         if self.state is not new_state:
@@ -70,3 +73,41 @@ class RegisterButton(Button):
         if self.state is not new_state:
             self.state = new_state
             return self.banks if self.state else None
+
+
+class StradellaPanel:
+    def __init__(self, buttons, velocity, banks, shift, midi_chan, midi_out):
+        self.buttons = buttons
+        self.velocity = velocity
+        self.banks = banks
+        self.shift = shift
+        self.midi_chan = midi_chan
+        self.midi_out = midi_out
+
+    def handle_event(self, event):
+        if event.type in [pygame.KEYDOWN, pygame.KEYUP]:
+            if event.key in self.buttons:
+                button = self.buttons[event.key]
+                new_state = button.is_push(event)
+                button.handle_switch(new_state,
+                                     self.banks,
+                                     self.shift,
+                                     self.midi_chan,
+                                     self.velocity,
+                                     self.midi_out)
+        elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
+            for key, button in self.buttons.items():
+                if button.mouse_over(event):
+                    new_state = button.is_push(event)
+                    button.handle_switch(new_state,
+                                         self.banks,
+                                         self.shift,
+                                         self.midi_chan,
+                                         self.velocity,
+                                         self.midi_out)
+
+    def draw(self, screen, font):
+        for key, button in self.buttons.items():
+            button.draw(screen, font)
+
+

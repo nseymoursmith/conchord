@@ -2,16 +2,6 @@ from buttons import RegisterButton, Button
 import os
 import pygame
 
-
-def reset_registers(registers, active):
-    active_banks = None
-    for key, button in registers.items():
-        state = True if key == active else False
-        bank_change = button.handle_switch(state)
-        active_banks = active_banks or bank_change
-    return active_banks
-
-
 button_radius = 30
 x0 = 450
 y0 = 100

@@ -111,3 +111,26 @@ class StradellaPanel:
             button.draw(screen, font)
 
 
+class RegisterPanel:
+    def __init__(self, buttons):
+        self.buttons = buttons
+        self.active_key = pygame.K_F7  # Default to soft bass
+        self.active_banks = self.buttons[self.active_key].banks
+        self.reset_registers()
+
+    def handle_event(self, event):
+        if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
+            for key, button in self.buttons.items():
+                if (button.mouse_over(event) and button.is_push(event)):
+                    self.active_key = key
+                    self.active_banks = button.banks
+                    self.reset_registers()
+
+    def reset_registers(self):
+        for key, button in self.buttons.items():
+            state = True if key == self.active_key else False
+            button.handle_switch(state)
+
+    def draw(self, screen, font):
+        for key, button in self.buttons.items():
+            button.draw(screen, font)

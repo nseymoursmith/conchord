@@ -73,8 +73,8 @@ chromatic_octave_shift = Button((650 + x0 - x_space * 1.5, y0),
 
 panel_switch = Button((550, 550),
                       button_radius*2,
-                      [pygame.image.load(os.path.join("button_images", "octave.png")),
-                       pygame.image.load(os.path.join("button_images", "octave_b.png"))],
+                      [pygame.image.load(os.path.join("button_images", "left_arrow.png")),
+                       pygame.image.load(os.path.join("button_images", "right_arrow_b.png"))],
                       None,
                       None,
                       True)

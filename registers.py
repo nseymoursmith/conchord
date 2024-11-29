@@ -3,8 +3,6 @@ import os
 import pygame
 
 button_radius = 15
-x0 = 150
-y0 = 100
 x_space = 45
 
 # registers
@@ -52,29 +50,3 @@ for i in range(len(register_keys)):
                                                                   None,
                                                                   register_banks[i],
                                                                   False)
-
-
-stradella_octave_shift = Button((x0 - x_space * 1.5, y0),
-                                button_radius*2,
-                                [pygame.image.load(os.path.join("button_images", "octave.png")),
-                                 pygame.image.load(os.path.join("button_images", "octave_b.png"))],
-                                None,
-                                None,
-                                True)
-
-chromatic_octave_shift = Button((800 + x0 - x_space * 1.5, y0),
-                                button_radius*2,
-                                [pygame.image.load(os.path.join("button_images", "octave.png")),
-                                 pygame.image.load(os.path.join("button_images", "octave_b.png"))],
-                                None,
-                                None,
-                                True)
-
-
-panel_switch = Button((740, 250),
-                      button_radius*2,
-                      [pygame.image.load(os.path.join("button_images", "left_arrow.png")),
-                       pygame.image.load(os.path.join("button_images", "right_arrow_b.png"))],
-                      None,
-                      None,
-                      True)

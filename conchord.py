@@ -1,9 +1,10 @@
-from buttons import NotePanel, RegisterPanel
-import mido
-import pygame
+from buttons import Button, NotePanel, RegisterPanel
 from chromatic import chromatic_buttons
+import mido
+import os
+import pygame
 from stradella import stradella_buttons
-from registers import stradella_register_buttons, stradella_octave_shift, chromatic_octave_shift, chromatic_register_buttons, panel_switch
+from registers import stradella_register_buttons, chromatic_register_buttons
 
 # Initialize Pygame
 pygame.init()
@@ -11,6 +12,11 @@ pygame.init()
 # Set up some constants
 WIDTH, HEIGHT = 1450, 450
 TEAL = (0, 127, 127)
+# TODO: centralise the coordinates/positioning configuration
+x0 = 150
+y0 = 100
+x_space = 45
+button_radius = 15
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -26,10 +32,24 @@ current_vel = 90
 midi_out_channel = 0
 midi_in_channel = 0
 
-# TODO: centralise the coordinates/positioning configuration
 stradella_registers = RegisterPanel((150, 100), stradella_register_buttons)
 chromatic_registers = RegisterPanel((950, 100), chromatic_register_buttons)
+stradella_octave_shift = Button((x0 - x_space * 1.5, y0),
+                                button_radius*2,
+                                [pygame.image.load(os.path.join("button_images", "octave.png")),
+                                 pygame.image.load(os.path.join("button_images", "octave_b.png"))],
+                                None,
+                                None,
+                                True)
 
+chromatic_octave_shift = Button((800 + x0 - x_space * 1.5, y0),
+                                button_radius*2,
+                                [pygame.image.load(os.path.join("button_images", "octave.png")),
+                                 pygame.image.load(os.path.join("button_images", "octave_b.png"))],
+                                None,
+                                None,
+                                True)
+ 
 stradella = NotePanel((50, 150),
                       stradella_buttons,
                       current_vel,
@@ -45,6 +65,15 @@ chromatic = NotePanel((800, 150),
                       chromatic_octave_shift.state,
                       midi_out_channel,
                       midi_output)
+
+panel_switch = Button((740, 250),
+                      button_radius*2,
+                      [pygame.image.load(os.path.join("button_images", "left_arrow.png")),
+                       pygame.image.load(os.path.join("button_images", "right_arrow_b.png"))],
+                      None,
+                      None,
+                      True)
+
 
 # Game loop
 running = True

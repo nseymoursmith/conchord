@@ -66,8 +66,8 @@ seventh_keys = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v,
                 pygame.K_PERIOD, pygame.K_SLASH, pygame.K_RSHIFT]
 
 
-coordinates = [(x0 + (n % columns)*x_space + math.floor(n / columns)*x_space/3,
-                y0 + math.floor(n / columns)*y_space)
+coordinates = [((n % columns)*x_space + math.floor(n / columns)*x_space/3,
+                math.floor(n / columns)*y_space)
                for n in range((rows * columns) - 1)]
 
 notes = counter_bass + root_notes + major_notes + minor_notes + seventh_notes

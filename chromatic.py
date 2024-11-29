@@ -7,8 +7,6 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 button_radius = 20
-x0 = 800
-y0 = 250
 x_space = 50
 y_space = 50
 rows = 5
@@ -51,8 +49,8 @@ fifth_keys = [pygame.K_BACKSLASH, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v
               pygame.K_b, pygame.K_n, pygame.K_m, pygame.K_COMMA,
               pygame.K_PERIOD, pygame.K_SLASH, pygame.K_RSHIFT]
 
-coordinates = [(x0 + (n % columns)*x_space + math.floor(n / columns)*x_space/3,
-                y0 + math.floor(n / columns)*y_space)
+coordinates = [((n % columns)*x_space + math.floor(n / columns)*x_space/3,
+                math.floor(n / columns)*y_space)
                for n in range(rows * columns)]
 coordinates[-12:] = [(coordinate[0] - x_space, coordinate[1]) for coordinate in coordinates[-12:]]
 

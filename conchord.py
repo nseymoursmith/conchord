@@ -9,7 +9,7 @@ from registers import stradella_register_buttons, stradella_octave_shift, chroma
 pygame.init()
 
 # Set up some constants
-WIDTH, HEIGHT = 1450, 650
+WIDTH, HEIGHT = 1450, 450
 TEAL = (0, 127, 127)
 
 # Set up the display
@@ -26,17 +26,20 @@ current_vel = 90
 midi_out_channel = 0
 midi_in_channel = 0
 
-stradella_registers = RegisterPanel(stradella_register_buttons)
-chromatic_registers = RegisterPanel(chromatic_register_buttons)
+# TODO: centralise the coordinates/positioning configuration
+stradella_registers = RegisterPanel((150, 100), stradella_register_buttons)
+chromatic_registers = RegisterPanel((950, 100), chromatic_register_buttons)
 
-stradella = NotePanel(stradella_buttons,
+stradella = NotePanel((50, 150),
+                      stradella_buttons,
                       current_vel,
                       stradella_registers.active_banks,
                       stradella_octave_shift.state,
                       midi_out_channel,
                       midi_output)
 
-chromatic = NotePanel(chromatic_buttons,
+chromatic = NotePanel((800, 150),
+                      chromatic_buttons,
                       current_vel,
                       chromatic_registers.active_banks,
                       chromatic_octave_shift.state,

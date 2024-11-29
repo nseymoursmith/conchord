@@ -16,6 +16,9 @@ class Button:
         self.colour = colour
         self.state = state
 
+    def __str__(self):
+        return f'Button({self.coords}, {self.size}, {self.images}, {self.text}, {self.colour}, {self.state})'
+
     def draw(self, screen, font):
         if self.images:
             image = self.images[1] if self.state else self.images[0]
@@ -78,13 +81,16 @@ class RegisterButton(Button):
 
 
 class NotePanel:
-    def __init__(self, buttons, velocity, banks, shift, midi_chan, midi_out):
+    def __init__(self, coords, buttons, velocity, banks, shift, midi_chan, midi_out):
+        self.coords = coords
         self.buttons = buttons
         self.velocity = velocity
         self.banks = banks
         self.shift = shift
         self.midi_chan = midi_chan
         self.midi_out = midi_out
+        for key, button in self.buttons.items():
+            button.coords = (button.coords[0] + self.coords[0], button.coords[1] + self.coords[1])
 
     def handle_event(self, event):
         if event.type in [pygame.KEYDOWN, pygame.KEYUP]:
@@ -114,11 +120,14 @@ class NotePanel:
 
 
 class RegisterPanel:
-    def __init__(self, buttons):
+    def __init__(self, coords, buttons):
+        self.coords = coords
         self.buttons = buttons
         self.active_key = pygame.K_F7  # Default to soft bass
         self.active_banks = self.buttons[self.active_key].banks
         self.reset_registers()
+        for key, button in self.buttons.items():
+            button.coords = (button.coords[0] + self.coords[0], button.coords[1] + self.coords[1])
 
     def handle_event(self, event):
         if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:

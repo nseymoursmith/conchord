@@ -38,14 +38,14 @@ register_keys = [pygame.K_F2, pygame.K_F3, pygame.K_F4, pygame.K_F5,
 stradella_register_buttons = {}
 chromatic_register_buttons = {}
 for i in range(len(register_keys)):
-    stradella_register_buttons[register_keys[i]] = RegisterButton((x0 + i * x_space, y0),
+    stradella_register_buttons[register_keys[i]] = RegisterButton((i * x_space, 0),
                                                                   button_radius*2,
                                                                   register_images[i],
                                                                   None,
                                                                   None,
                                                                   register_banks[i],
                                                                   False)
-    chromatic_register_buttons[register_keys[i]] = RegisterButton((650 + x0 + i * x_space, y0),
+    chromatic_register_buttons[register_keys[i]] = RegisterButton((i * x_space, 0),
                                                                   button_radius*2,
                                                                   register_images[i],
                                                                   None,
@@ -62,7 +62,7 @@ stradella_octave_shift = Button((x0 - x_space * 1.5, y0),
                                 None,
                                 True)
 
-chromatic_octave_shift = Button((650 + x0 - x_space * 1.5, y0),
+chromatic_octave_shift = Button((800 + x0 - x_space * 1.5, y0),
                                 button_radius*2,
                                 [pygame.image.load(os.path.join("button_images", "octave.png")),
                                  pygame.image.load(os.path.join("button_images", "octave_b.png"))],
@@ -71,7 +71,7 @@ chromatic_octave_shift = Button((650 + x0 - x_space * 1.5, y0),
                                 True)
 
 
-panel_switch = Button((550, 550),
+panel_switch = Button((740, 250),
                       button_radius*2,
                       [pygame.image.load(os.path.join("button_images", "left_arrow.png")),
                        pygame.image.load(os.path.join("button_images", "right_arrow_b.png"))],

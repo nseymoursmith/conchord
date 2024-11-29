@@ -3,7 +3,7 @@ import mido
 import pygame
 from chromatic import chromatic_buttons
 from stradella import stradella_buttons
-from registers import stradella_register_buttons, stradella_octave_shift, chromatic_octave_shift, chromatic_register_buttons
+from registers import stradella_register_buttons, stradella_octave_shift, chromatic_octave_shift, chromatic_register_buttons, panel_switch
 
 # Initialize Pygame
 pygame.init()
@@ -43,8 +43,6 @@ chromatic = NotePanel(chromatic_buttons,
                       midi_out_channel,
                       midi_output)
 
-go_chromatic = True
-
 # Game loop
 running = True
 while running:
@@ -57,7 +55,7 @@ while running:
         chromatic_registers.handle_event(event)
         stradella.banks = stradella_registers.active_banks
         chromatic.banks = chromatic_registers.active_banks
-        if go_chromatic:
+        if panel_switch.state:
             chromatic.handle_event(event)
         else:
             stradella.handle_event(event)
@@ -70,7 +68,8 @@ while running:
             if (chromatic_octave_shift.mouse_over(event) and chromatic_octave_shift.is_push(event)):
                 chromatic_octave_shift.handle_switch(not chromatic_octave_shift.state)
                 chromatic.shift = chromatic_octave_shift.state
-                chromatic.shift = chromatic_octave_shift.state
+            if (panel_switch.mouse_over(event) and panel_switch.is_push(event)):
+                panel_switch.handle_switch(not panel_switch.state)
 
     # Draw everything
     screen.fill(TEAL)
@@ -80,6 +79,7 @@ while running:
     chromatic_registers.draw(screen, font)
     stradella_octave_shift.draw(screen, font)
     chromatic_octave_shift.draw(screen, font)
+    panel_switch.draw(screen, font)
 
     pygame.display.flip()
 

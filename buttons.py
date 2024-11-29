@@ -8,11 +8,12 @@ BLACK = (0, 0, 0)
 
 
 class Button:
-    def __init__(self, coords, size, images, text, state):
+    def __init__(self, coords, size, images, text, colour, state):
         self.coords = coords
         self.size = size
         self.images = images
         self.text = text
+        self.colour = colour
         self.state = state
 
     def draw(self, screen, font):
@@ -23,10 +24,11 @@ class Button:
             image_rect = image.get_rect(center=self.coords)
             screen.blit(image_scaled, image_rect)
         else:
-            colour = WHITE if (self.state is False) else GREY
+            colour = self.colour if (self.state is False) else GREY
             pygame.draw.circle(screen, colour, self.coords, self.size)
         if self.text:
-            text_surface = font.render(self.text, True, BLACK)
+            text_colour = WHITE if self.colour == BLACK else BLACK
+            text_surface = font.render(self.text, True, text_colour)
             text_rect = text_surface.get_rect(center=self.coords)
             screen.blit(text_surface, text_rect)
 
@@ -46,8 +48,8 @@ class Button:
 
 
 class NoteButton(Button):
-    def __init__(self, coords, size, images, text, notes, state):
-        super().__init__(coords, size, images, text, state)
+    def __init__(self, coords, size, images, text, colour, notes, state):
+        super().__init__(coords, size, images, text, colour, state)
         self.notes = notes
 
     def handle_switch(self, new_state, banks, shift, midi_chan, vel, output):
@@ -65,8 +67,8 @@ class NoteButton(Button):
 
 
 class RegisterButton(Button):
-    def __init__(self, coords, size, images, text, banks, state):
-        super().__init__(coords, size, images, text, state)
+    def __init__(self, coords, size, images, text, colour, banks, state):
+        super().__init__(coords, size, images, text, colour, state)
         self.banks = banks
 
     def handle_switch(self, new_state):
@@ -75,7 +77,7 @@ class RegisterButton(Button):
             return self.banks if self.state else None
 
 
-class StradellaPanel:
+class NotePanel:
     def __init__(self, buttons, velocity, banks, shift, midi_chan, midi_out):
         self.buttons = buttons
         self.velocity = velocity

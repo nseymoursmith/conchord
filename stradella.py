@@ -2,11 +2,15 @@ from buttons import NoteButton
 import math
 import pygame
 
-button_radius = 40
-x0 = 100
+GREY = (127, 127, 127)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+button_radius = 20
+x0 = 50
 y0 = 250
-x_space = 100
-y_space = 100
+x_space = 50
+y_space = 50
 rows = 5
 columns = 12
 
@@ -53,17 +57,18 @@ minor_keys = [pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f,
               pygame.K_g, pygame.K_h, pygame.K_j, pygame.K_k,
               pygame.K_l, pygame.K_SEMICOLON, pygame.K_QUOTE, pygame.K_HASH]
 
+# Cut the last button because no key on keyboard
 seventh_notes = [list(map(lambda x: x + n[0] + 12, (0, 4, 10)))
-                 for n in root_notes]
+                 for n in root_notes][:11]
 seventh_names = [f"{root_name}7" for root_name in root_names]
 seventh_keys = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v,
                 pygame.K_b, pygame.K_n, pygame.K_m, pygame.K_COMMA,
-                pygame.K_PERIOD, pygame.K_SLASH, pygame.K_F14, pygame.K_F15]
+                pygame.K_PERIOD, pygame.K_SLASH, pygame.K_RSHIFT]
 
 
 coordinates = [(x0 + (n % columns)*x_space + math.floor(n / columns)*x_space/3,
                 y0 + math.floor(n / columns)*y_space)
-               for n in range(rows * columns)]
+               for n in range((rows * columns) - 1)]
 
 notes = counter_bass + root_notes + major_notes + minor_notes + seventh_notes
 names = cb_names + root_names + major_names + minor_names + seventh_names
@@ -75,5 +80,6 @@ for i in range(len(keys)):
                                             button_radius,
                                             None,
                                             names[i],
+                                            WHITE,
                                             notes[i],
                                             False)

@@ -19,6 +19,8 @@
 
 # Conchord: A keyboard & mouse controlled MIDI stradella emulation
 ## Introduction
+N.B. This documentation isn't fully up to date, but gives you a sense of how the whole thing works. Proper updates to documentation to come. 
+
 ![An image of the conchord program running. 5 rows of 12 keys, with one top row of register keys](documentation/conchord.png "conchord")
 
 Info on the accordion stradella layout that this emulates can be found [here](https://en.wikipedia.org/wiki/Stradella_bass_system).

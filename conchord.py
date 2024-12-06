@@ -34,7 +34,7 @@ midi_in_channel = 0
 
 stradella_registers = RegisterPanel((150, 100), stradella_register_buttons)
 chromatic_registers = RegisterPanel((950, 100), chromatic_register_buttons)
-stradella_octave_shift = Button((x0 - x_space * 1.5, y0),
+stradella_shift = Button((x0 - x_space * 1.5, y0),
                                 button_radius*2,
                                 [pygame.image.load(os.path.join("button_images", "octave.png")),
                                  pygame.image.load(os.path.join("button_images", "octave_b.png"))],
@@ -42,7 +42,7 @@ stradella_octave_shift = Button((x0 - x_space * 1.5, y0),
                                 None,
                                 True)
 
-chromatic_octave_shift = Button((800 + x0 - x_space * 1.5, y0),
+chromatic_shift = Button((800 + x0 - x_space * 1.5, y0),
                                 button_radius*2,
                                 [pygame.image.load(os.path.join("button_images", "octave.png")),
                                  pygame.image.load(os.path.join("button_images", "octave_b.png"))],
@@ -54,7 +54,7 @@ stradella = NotePanel((50, 150),
                       stradella_buttons,
                       current_vel,
                       stradella_registers.active_banks,
-                      stradella_octave_shift.state,
+                      stradella_shift.state,
                       midi_out_channel,
                       midi_output)
 
@@ -62,7 +62,7 @@ chromatic = NotePanel((800, 150),
                       chromatic_buttons,
                       current_vel,
                       chromatic_registers.active_banks,
-                      chromatic_octave_shift.state,
+                      chromatic_shift.state,
                       midi_out_channel,
                       midi_output)
 
@@ -94,12 +94,12 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
-            if (stradella_octave_shift.mouse_over(event) and stradella_octave_shift.is_push(event)):
-                stradella_octave_shift.handle_switch(not stradella_octave_shift.state)
-                stradella.shift = stradella_octave_shift.state
-            if (chromatic_octave_shift.mouse_over(event) and chromatic_octave_shift.is_push(event)):
-                chromatic_octave_shift.handle_switch(not chromatic_octave_shift.state)
-                chromatic.shift = chromatic_octave_shift.state
+            if (stradella_shift.mouse_over(event) and stradella_shift.is_push(event)):
+                stradella_shift.handle_switch(not stradella_shift.state)
+                stradella.shift = stradella_shift.state
+            if (chromatic_shift.mouse_over(event) and chromatic_shift.is_push(event)):
+                chromatic_shift.handle_switch(not chromatic_shift.state)
+                chromatic.shift = chromatic_shift.state
             if (panel_switch.mouse_over(event) and panel_switch.is_push(event)):
                 panel_switch.handle_switch(not panel_switch.state)
 
@@ -109,8 +109,8 @@ while running:
     stradella.draw(screen, font)
     stradella_registers.draw(screen, font)
     chromatic_registers.draw(screen, font)
-    stradella_octave_shift.draw(screen, font)
-    chromatic_octave_shift.draw(screen, font)
+    stradella_shift.draw(screen, font)
+    chromatic_shift.draw(screen, font)
     panel_switch.draw(screen, font)
 
     pygame.display.flip()
